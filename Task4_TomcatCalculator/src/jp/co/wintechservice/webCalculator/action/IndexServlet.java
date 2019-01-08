@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * 初期表示画面用のサーブレット
+ * @author KohariJunichiro
  */
 @WebServlet("/IndexServlet")
 public class IndexServlet extends HttpServlet {
