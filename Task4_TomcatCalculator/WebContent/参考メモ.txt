@@ -1,0 +1,9 @@
+//電卓 レジスタ
+  https://www.e-bridge.jp/eb/tcontents/yasasikunai-p/chapExC05.html
+//submitボタン複数
+  https://qiita.com/echoprogress/items/17e85ad489bddf07b540
+  https://teratail.com/questions/27033
+//getParameter,getParameterValues,【getparameterMap】
+  nameキー、value配列のペア
+  http://mergedoc.osdn.jp/tomcat-servletapi-5-ja/javax/servlet/ServletRequest.html#getParameterMap()
+  https://www.java4s.com/java-servlet-tutorials/example-on-getparametermap-method-of-servlet-request-object/
