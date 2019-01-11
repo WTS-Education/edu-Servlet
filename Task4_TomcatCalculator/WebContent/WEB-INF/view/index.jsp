@@ -17,6 +17,8 @@
 	<table>
 	<tr>
 		<td colspan="4" style="width:400px; height:50px">${calc.result}</td>>
+		<td colspan="4" style="width:400px; height:50px">【テストX】${calc.x}</td>>
+		<td colspan="4" style="width:400px; height:50px">【テストY】${calc.y}</td>>
 
 	<tr>
 		<td><input type=submit name="Del" value="CE" style="width:100px; height:100px">
@@ -46,7 +48,7 @@
 		<td><input type=submit name="operator" value="±" style="width:100px; height:100px">
 		<td><input type=submit name="num" value="0" style="width:100px; height:100px">
 		<td><input type=submit name="num" value="." style="width:100px; height:100px">
-		<td><input type=submit name="result" value="=" style="width:100px; height:100px">
+		<td><input type=submit name="equal" value="=" style="width:100px; height:100px">
 	</table>
 	</form>
 </fieldset>

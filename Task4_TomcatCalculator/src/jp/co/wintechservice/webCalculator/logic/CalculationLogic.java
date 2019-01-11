@@ -40,10 +40,9 @@ public class CalculationLogic extends HttpServlet {
             calc = new Calc();
             session.setAttribute("calc",calc);
             calc.setResult("0");
+            calc.setX(0);
+            calc.setY(0);
         }
-
-
-
 
 	    //num(数字、小数点)が押下された場合
 	    if (request.getParameterMap().containsKey("num")) {
@@ -54,55 +53,93 @@ public class CalculationLogic extends HttpServlet {
 	        }
 	        //numが数字の場合
 	        else {
-	          //result又はxが0ならresultを空にする(先頭の0削除)
+	            //result又はxが0ならresultを空にする(先頭の0削除)
 	            if (calc.getResult().equals("0") || calc.getX() == 0) {
 	                calc.setResult("");
 	            }
-	            //数字を連結して結果レジスタにセット
-	            calc.setResult(calc.getResult() + num);
-	            //
-	        }
-	        calc.setX(Double.parseDouble(calc.getResult()));
-        }
-
-
-	    //CE,C,戻 が押下された場合(保留)
-	    if (request.getParameterMap().containsKey("Del")) {
-	        String del = request.getParameter("del");
-	        if (del.equals("CE")) {
-	            calc.setResult("0");
-	        } else if (del.equals("C")) {
-	            calc.setResult("0");
-	            calc.setX(0);
-	            calc.setY(0);
-	        } else if (del.equals("戻")){
-
+	            //operatorがスコープに入っていたらresultを空にする
+	            if (session.getAttribute("operator") != null) {
+	                calc.setResult("");
+                    session.removeAttribute("operator");
+                }
+                //数字を連結して結果レジスタにセット
+                calc.setResult(calc.getResult() + num);
+                //そしてXレジスタにセット
+                calc.setX(Double.parseDouble(calc.getResult()));
 	        }
         }
 
 	    //operatorが押下された場合
 	    if (request.getParameterMap().containsKey("operator")){
             String operator = request.getParameter("operator");
-            //
-            if (session.getAttribute("operator") == null){
+            //初めてオペレータが押される場合、Xの値をYにコピー
+            if (session.getAttribute("operator") == null) {
                 calc.setY(calc.getX());
                 calc.setX(0);
                 session.setAttribute("operator", operator);
             }
-          //四則演算
-            if (operator.equals("+")) {
-                calc.add();
-            } else if (operator.equals("-")) {
-                calc.substract();
-            } else if (operator.equals("×")) {
-                calc.multiply();
-            } else if (operator.equals("÷")) {
-                try {
-                    calc.divide();
-                } catch (ArithmeticException e) {
-                    System.out.print("0で割ることはできません");
+            //Xレジスタに結果レジスタの値をコピー
+            calc.setX(Double.parseDouble(calc.getResult()));
+
+         //equal(=)が押下された場合
+         if (request.getParameterMap().containsKey("equal")) {
+             String equal = request.getParameter("=");
+             //Yレジスタに結果レジスタの値をコピー
+             if (equal.equals("equal")) {
+                 calc.setY(Double.parseDouble(calc.getResult()));
+             }
+             //スコープにオペレータが入っていたらオペレータのタイプに応じて演算
+             if (session.getAttribute("operator") != null) {
+                 //足し算
+                 if (operator.equals("+")) {
+                     String addResult = String.valueOf(calc.getX() + calc.getY());
+                     calc.setResult(addResult);
+                 }
+                 //引き算
+                 else if (operator.equals("-")) {
+                     String substractResult = String.valueOf(calc.getX() - calc.getY());
+                     calc.setResult(substractResult);
+                 }
+                 //掛け算
+                 else if (operator.equals("×")) {
+                     String multiplyResult = String.valueOf(calc.getX() * calc.getY());
+                     calc.setResult(multiplyResult);
+                 }
+                 //割り算
+                 else if (operator.equals("÷")) {  //（保留）
+                     try {
+                         String divideResult = String.valueOf(calc.getX() / calc.getY());
+                         calc.setResult(divideResult);
+                     } catch (ArithmeticException e) {
+                         System.out.print("0で割ることはできません");
+                     }
+                 }
+             }
+        }
+
+       //CE,C,戻 が押下された場合
+         if (request.getParameterMap().containsKey("Del")) {
+             String del = request.getParameter("Del");
+             if (del.equals("CE")) {
+                 calc.setResult("0");
+             } else if (del.equals("C")) {
+                 calc.setResult("0");
+                 calc.setX(0);
+                 calc.setY(0);
+             } else if (del.equals("戻")){
+                 int length = calc.getResult().length();
+                 int lengthBack = calc.getResult().length() - 1;
+                 String resultBack;
+                 if (length > 0) {
+                    StringBuilder back = new StringBuilder(calc.getResult());
+                    back.deleteCharAt(lengthBack);
+                    resultBack = back.toString();
+                    calc.setResult(resultBack);
                 }
-            }
+
+             }
+         }
+
 
 	     }
 

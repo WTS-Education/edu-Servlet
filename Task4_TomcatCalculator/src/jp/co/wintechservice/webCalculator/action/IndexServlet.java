@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import jp.co.wintechservice.webCalculator.logic.CalculationLogic;
 
 /**
- * 電卓サーブレット(http://localhost:8081/Task4_Tomcatcalc/IndexServlet)
+ * コントローラー(http://localhost:8081/Task4_Tomcatcalc/IndexServlet)
  * @author KohariJunichiro
  */
 @WebServlet("/IndexServlet")
@@ -33,6 +33,7 @@ public class IndexServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // TODO Auto-generated method stub
 
+        //CalculationLogicに計算してもらう
        CalculationLogic.calc(request,response);
 
        //電卓画面表示
