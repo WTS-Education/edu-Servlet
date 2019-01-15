@@ -9,21 +9,23 @@
 <body>
     <%= new java.util.Date() %>
 
-<jsp:useBean id="calc" class="jp.co.wintechservice.webCalculator.beans.Calc" scope="session"></jsp:useBean>
+<jsp:useBean id="calc" class="jp.co.wintechservice.webCalculator.beans.CalcBean" scope="session"></jsp:useBean>
 
 <fieldset style="width:450px"><br>
 	<form action="IndexServlet" method="POST">
 
 	<table>
 	<tr>
-		<td colspan="4" style="width:400px; height:50px">${calc.result}</td>>
+		<td colspan="4" style="width:400px; height:50px">${calc.input}</td>>
+		<td colspan="4" style="width:400px; height:50px">【テストR】${calc.result}</td>>
 		<td colspan="4" style="width:400px; height:50px">【テストX】${calc.x}</td>>
 		<td colspan="4" style="width:400px; height:50px">【テストY】${calc.y}</td>>
+		<td colspan="4" style="width:400px; height:50px">【テストO】${calc.operator}</td>>
 
 	<tr>
-		<td><input type=submit name="Del" value="CE" style="width:100px; height:100px">
-		<td><input type=submit name="Del" value="C" style="width:100px; height:100px">
-		<td><input type=submit name="Del" value="戻" style="width:100px; height:100px">
+		<td><input type=submit name="del" value="CE" style="width:100px; height:100px">
+		<td><input type=submit name="del" value="C" style="width:100px; height:100px">
+		<td><input type=submit name="del" value="戻" style="width:100px; height:100px">
 		<td><input type=submit name="operator" value="÷" style="width:100px; height:100px">
 
 	<tr>
@@ -48,7 +50,7 @@
 		<td><input type=submit name="operator" value="±" style="width:100px; height:100px">
 		<td><input type=submit name="num" value="0" style="width:100px; height:100px">
 		<td><input type=submit name="num" value="." style="width:100px; height:100px">
-		<td><input type=submit name="equal" value="=" style="width:100px; height:100px">
+		<td><input type=submit name="operator" value="=" style="width:100px; height:100px">
 	</table>
 	</form>
 </fieldset>

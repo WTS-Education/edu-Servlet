@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import jp.co.wintechservice.webCalculator.beans.Calc;
+import jp.co.wintechservice.webCalculator.beans.CalcBean;
 
 /**
  * Servlet implementation class CalclatorLogic
@@ -33,108 +33,103 @@ public class CalculationLogic extends HttpServlet {
 		// TODO Auto-generated method stub
 
 	    HttpSession session = request.getSession();
-	    Calc calc = (Calc)session.getAttribute("calc");
+	    CalcBean calc = (CalcBean)session.getAttribute("calc");
 
 	    //初回calcインスタンス作成、初期値0セット
 	    if (calc == null){
-            calc = new Calc();
+            calc = new CalcBean();
             session.setAttribute("calc",calc);
-            calc.setResult("0");
+            calc.setInput("0");
+            calc.setResult(0);
             calc.setX(0);
             calc.setY(0);
+            calc.setOperator("");
         }
 
 	    //num(数字、小数点)が押下された場合
 	    if (request.getParameterMap().containsKey("num")) {
 	        String num = request.getParameter("num");
-	        //numが小数点かつresultが整数の場合
-	        if (num.equals(".") && !calc.getResult().contains(".")) {
-	            calc.setResult(calc.getResult() + ".");
+	        //numが小数点かつinputが整数の場合
+	        if (num.equals(".")) {
+	            calc.setInput(calc.getInput() + num);
 	        }
 	        //numが数字の場合
 	        else {
-	            //result又はxが0ならresultを空にする(先頭の0削除)
-	            if (calc.getResult().equals("0") || calc.getX() == 0) {
-	                calc.setResult("");
-	            }
-	            //operatorがスコープに入っていたらresultを空にする
-	            if (session.getAttribute("operator") != null) {
-	                calc.setResult("");
-                    session.removeAttribute("operator");
+//2019/01/16 演算子が入っているときに数字を押した場合の処理がおかしい
+	            //先頭の0削除
+	            if (calc.getInput() == "0") {
+	                String havingFirstZero = calc.getInput() + num;
+	                StringBuilder killingFirstZero = new StringBuilder(havingFirstZero);
+	                killingFirstZero.deleteCharAt(0);
+	                calc.setInput(killingFirstZero.toString());
+	            } else {
+	                //押下された数字を連結
+                    calc.setInput(calc.getInput() + num);
                 }
-                //数字を連結して結果レジスタにセット
-                calc.setResult(calc.getResult() + num);
-                //そしてXレジスタにセット
-                calc.setX(Double.parseDouble(calc.getResult()));
+                //ResultをXにセット
+                calc.setX(calc.getResult());
+                //InputをYにセット
+                calc.setY(Double.parseDouble(calc.getInput()));
 	        }
         }
-
 	    //operatorが押下された場合
-	    if (request.getParameterMap().containsKey("operator")){
+	    else if (request.getParameterMap().containsKey("operator")){
             String operator = request.getParameter("operator");
-            //初めてオペレータが押される場合、Xの値をYにコピー
-            if (session.getAttribute("operator") == null) {
-                calc.setY(calc.getX());
-                calc.setX(0);
-                session.setAttribute("operator", operator);
+            //operatorが空の場合
+            if (calc.getOperator().isEmpty()) {
+                calc.setOperator(operator);
             }
-            //Xレジスタに結果レジスタの値をコピー
-            calc.setX(Double.parseDouble(calc.getResult()));
 
-         //equal(=)が押下された場合
-         if (request.getParameterMap().containsKey("equal")) {
-             String equal = request.getParameter("=");
-             //Yレジスタに結果レジスタの値をコピー
-             if (equal.equals("equal")) {
-                 calc.setY(Double.parseDouble(calc.getResult()));
-             }
-             //スコープにオペレータが入っていたらオペレータのタイプに応じて演算
-             if (session.getAttribute("operator") != null) {
-                 //足し算
-                 if (operator.equals("+")) {
-                     String addResult = String.valueOf(calc.getX() + calc.getY());
-                     calc.setResult(addResult);
-                 }
-                 //引き算
-                 else if (operator.equals("-")) {
-                     String substractResult = String.valueOf(calc.getX() - calc.getY());
-                     calc.setResult(substractResult);
-                 }
-                 //掛け算
-                 else if (operator.equals("×")) {
-                     String multiplyResult = String.valueOf(calc.getX() * calc.getY());
-                     calc.setResult(multiplyResult);
-                 }
-                 //割り算
-                 else if (operator.equals("÷")) {  //（保留）
-                     try {
-                         String divideResult = String.valueOf(calc.getX() / calc.getY());
-                         calc.setResult(divideResult);
-                     } catch (ArithmeticException e) {
-                         System.out.print("0で割ることはできません");
-                     }
-                 }
-             }
-        }
+            //足し算
+            if (calc.getOperator().equals("+")) {
+                calc.setResult(calc.getX() + calc.getY());
+            }
+            //引き算
+            else if (calc.getOperator().equals("-")) {
+                calc.setResult(calc.getX() - calc.getY());
+            }
+            //掛け算
+            else if (calc.getOperator().equals("*")) {
+                calc.setResult(calc.getX() * calc.getY());
+            }
+            //割り算
+            else if (calc.getOperator().equals("/")) {
+                if (calc.getY() == 0) {
+                    calc.setInput("0で割ることはできません");
+                } else {
+                    calc.setResult(calc.getX() / calc.getY());
+                }
+            }
+            //計算結果を出力
+            calc.setInput(String.valueOf(calc.getResult()));
+            //演算子をセット
+            calc.setOperator(operator);
+	    }
+
 
        //CE,C,戻 が押下された場合
-         if (request.getParameterMap().containsKey("Del")) {
-             String del = request.getParameter("Del");
+         if (request.getParameterMap().containsKey("del")) {
+             String del = request.getParameter("del");
+             //CE,Cの場合
              if (del.equals("CE")) {
-                 calc.setResult("0");
+                 calc.setInput("0");
              } else if (del.equals("C")) {
-                 calc.setResult("0");
+                 calc.setInput("0");
+                 calc.setResult(0);
                  calc.setX(0);
                  calc.setY(0);
-             } else if (del.equals("戻")){
-                 int length = calc.getResult().length();
-                 int lengthBack = calc.getResult().length() - 1;
-                 String resultBack;
+                 calc.setOperator("");
+             }
+             //戻の場合
+             else if (del.equals("戻")){
+                 //押下された値の桁数
+                 int length = String.valueOf(calc.getInput()).length();
+                 //最後尾の数字のインデックス
+                 int lengthBack = length - 1;
                  if (length > 0) {
-                    StringBuilder back = new StringBuilder(calc.getResult());
+                    StringBuilder back = new StringBuilder(calc.getInput());
                     back.deleteCharAt(lengthBack);
-                    resultBack = back.toString();
-                    calc.setResult(resultBack);
+                    calc.setInput(back.toString());
                 }
 
              }
@@ -142,7 +137,6 @@ public class CalculationLogic extends HttpServlet {
 
 
 	     }
-
-	}
-
 }
+
+
