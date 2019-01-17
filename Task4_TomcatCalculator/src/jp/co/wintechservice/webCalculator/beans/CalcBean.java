@@ -22,13 +22,21 @@ public class CalcBean {
      */
     private String operator;
 
+    /**
+     * 計算式
+     */
+    StringBuilder expression = new StringBuilder();
+
+
     //getter,setter
     public String getOutput() {
         return output;
     }
     public void setOutput(String output) {
-        if (String.valueOf(output).length() < 17) {
+        if (output.length() <17) {
             this.output = output;
+        } else {
+            this.output = output.substring(0, 17);
         }
     }
 
@@ -45,6 +53,17 @@ public class CalcBean {
     public void setOperator(String operator) {
         this.operator = operator;
     }
+
+    public StringBuilder getExpression() {
+        return expression;
+    }
+    public void setExpression(String num, String operator) {
+        expression.append(num);
+        expression.append(operator);
+    }
+
+
+
 
 
 }
