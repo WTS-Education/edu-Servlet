@@ -82,18 +82,19 @@ public class CalculationLogic extends HttpServlet {
 	            calc.setInput(calc.getOutput());
 	            //新しく押下されたオペレータをセット
 	            calc.setOperator(operator);
+	            calc.setExpression("changeOperator", operator);
             } else {
                 BigDecimal result = new BigDecimal(calc.getOutput());
                 BigDecimal x = new BigDecimal(calc.getInput());
                 //前回の計算結果
                 String previousResult = calc.getOutput();
-
                 //起動して初めてオペレーターが押下された場合
                 if (calc.getOperator().isEmpty()) {
+                    //計算式を作成
+                    calc.setExpression(previousResult, operator);
                     //入力された数字を控えておく
                     calc.setInput(calc.getOutput());
                 } else {
-
                   //足し算
                     if (calc.getOperator().equals("+")) {
                         calc.setOutput(x.add(result).toString());
@@ -110,7 +111,10 @@ public class CalculationLogic extends HttpServlet {
                     else if (calc.getOperator().equals("÷")) {
                         calc.setOutput(x.divide(result, 15, RoundingMode.HALF_UP).stripTrailingZeros().toString());
                     }
+                    //計算式を作成
+                    calc.setExpression(previousResult, operator);
                 }
+                //イコールが押下された場合
                 if (operator.equals("=")) {
                     //前回の演算子
                     String previousOperator = calc.getOperator();
@@ -126,6 +130,8 @@ public class CalculationLogic extends HttpServlet {
                         operator = previousOperator;
                         //前回の計算結果を控えない
                     }
+                    //計算式削除
+                    calc.setExpression("resetNumber", "resetOperator");
                 } else {
                     //計算結果を控えておく
                     calc.setInput(calc.getOutput());
@@ -133,7 +139,6 @@ public class CalculationLogic extends HttpServlet {
                 //operatorを控えておく
                 calc.setOperator(operator);
                 session.setAttribute("operator", operator);
-
             }
 	    }
 
@@ -141,50 +146,64 @@ public class CalculationLogic extends HttpServlet {
 	    //plusAlphaが押下された場合(±、√、x²、1/x)
 	    if (request.getParameterMap().containsKey("plusAlpha")) {
 	        String plusAlpha = request.getParameter("plusAlpha");
+	        String previousResult = calc.getOutput();
 	        if (plusAlpha.equals("±")) {
 	            calc.setOutput(String.valueOf(Integer.parseInt(calc.getOutput()) * -1));
+            } else {
+              //百分率
+                if (plusAlpha.equals("%")) {
+                    BigDecimal hundred = new BigDecimal(100);
+                    BigDecimal output = new BigDecimal(calc.getOutput());
+                    BigDecimal input = new BigDecimal(calc.getInput());
+                    //output * (input /100)
+                    String percent = String.valueOf(output.multiply(input.divide(hundred, 15, RoundingMode.HALF_UP)).stripTrailingZeros());
+                    calc.setOutput(percent);
+                } else {
+                    //平方根
+                    if (plusAlpha.equals("√")) {
+                        String sqrt = String.valueOf(Math.sqrt(Double.parseDouble(calc.getOutput())));
+                        calc.setOutput(sqrt);
+                        calc.setExpression(previousResult, plusAlpha);
+                        //直前に√が押下された場合
+                        if (session.getAttribute("plusAlpha") != null) {
+                            calc.setExpression("hasRoot", plusAlpha);
+                        }
+                        else {
+                        }
+                        session.setAttribute("plusAlpha", plusAlpha);
+                    }
+                    //2乗
+                    else if (plusAlpha.equals("x²")) {
+                        BigDecimal square = new BigDecimal(calc.getOutput());
+                        calc.setOutput(square.multiply(square).toString());
+                    }
+                    //逆数
+                    else if (plusAlpha.equals("1/x")) {
+                        BigDecimal one = new BigDecimal(1);
+                        BigDecimal inverse = new BigDecimal(calc.getOutput());
+                        calc.setOutput(one.divide(inverse, 15, RoundingMode.HALF_UP).stripTrailingZeros().toString());
+                    }
+                }
             }
-	        //百分率
-	        else if (plusAlpha.equals("%")) {
-                BigDecimal hundred = new BigDecimal(100);
-                BigDecimal output = new BigDecimal(calc.getOutput());
-                BigDecimal input = new BigDecimal(calc.getInput());
-                //output * (input /100)
-                String percent = String.valueOf(output.multiply(input.divide(hundred, 15, RoundingMode.HALF_UP)).stripTrailingZeros());
-                calc.setOutput(percent);
-            }
-	        //平方根
-	        else if (plusAlpha.equals("√")) {
-                String sqrt = String.valueOf(Math.sqrt(Double.parseDouble(calc.getOutput())));
-                calc.setOutput(sqrt);
-            }
-	        //2乗
-	        else if (plusAlpha.equals("x²")) {
-                BigDecimal square = new BigDecimal(calc.getOutput());
-                calc.setOutput(square.multiply(square).toString());
-            }
-	        //逆数
-	        else if (plusAlpha.equals("1/x")) {
-                BigDecimal one = new BigDecimal(1);
-                BigDecimal inverse = new BigDecimal(calc.getOutput());
-                calc.setOutput(one.divide(inverse, 15, RoundingMode.HALF_UP).stripTrailingZeros().toString());
-            }
-
-        }
+	                }
 
        //CE,C,戻 が押下された場合
          if (request.getParameterMap().containsKey("del")) {
              String del = request.getParameter("del");
-             //CE,Cの場合
+             //CE(入力中の文字を削除)
              if (del.equals("CE")) {
                  calc.setOutput("0");
-             } else if (del.equals("C")) {
+             }
+             //C(リセット)
+             else if (del.equals("C")) {
                  calc.setOutput("0");
                  calc.setInput("0");
                  calc.setOperator("");
+                 calc.setExpression("resetNumber", "resetOperator");
                  session.setAttribute("operator", null);
+                 session.setAttribute("plusAlpha", null);
              }
-             //戻の場合 //一桁の場合は0にする
+             //◀(バックスペース)
              else if (del.equals("◀")){
                  //押下された値の桁数
                  int length = String.valueOf(calc.getOutput()).length();
@@ -195,12 +214,9 @@ public class CalculationLogic extends HttpServlet {
                     back.deleteCharAt(lengthBack);
                     calc.setOutput(back.toString());
                 }
-
              }
          }
-
-
-	     }
+	 }
 }
 
 
