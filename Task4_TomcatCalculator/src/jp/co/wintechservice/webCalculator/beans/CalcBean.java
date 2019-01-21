@@ -25,7 +25,7 @@ public class CalcBean {
     /**
      * 計算式
      */
-    StringBuilder expression = new StringBuilder();
+    private String expression;
 
     private String x;
 
@@ -62,37 +62,14 @@ public class CalcBean {
     public void setX(String x) {
         this.x = x;
     }
-    public StringBuilder getExpression() {
+
+    public String getExpression() {
         return expression;
     }
-    public void setExpression(String num, String operator) {
-        if (num == "resetNumber") {
-            expression.delete(0, expression.length());
-        } else if (num == "changeOperator") {
-            expression.append(getOutput());
-        } else if (operator.equals("√")) {
-            if (num.equals("hasRoot")) { //windows電卓は√入力するときスペース入っていない
-                String[] expressionArray = expression.toString().split(" ");
-                int rootIndex = expressionArray.length -1;
-                String root = "√(" + getX() + ")";
-                expressionArray[rootIndex] = root;
-                expression.append(root);
-                setX(root);
-            } else {
-                String rootFormat = "√(" + getOutput() + ")";
-                expression.append(rootFormat + " ");
-                setX(rootFormat);
-            }
-        } else if (operator.equals("x²")) {
-            expression.append("sqr(").append(num).append(")");
-        } else if (operator.equals("1/x")) {
-            expression.append("1/(").append(num).append(")");
-        }
-        else {
-            expression.append(num + " ");
-            expression.append(operator + " ");
-        }
+    public void setExpression(String expression) {
+        this.expression = expression;
     }
+
 
 
 }
